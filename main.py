@@ -108,7 +108,7 @@ def generate_embeddings(num_pairs=1000):
 
     print("Embeddings saved to 'example_pairs_embeddings.txt'.")
 
-def load_embeddings(fname="example_pairs_embeddings.txt"):
+def parse_embeddings(fname="example_pairs_embeddings.txt"):
     with open(fname) as f:
         positive_embeddings = []
         negative_embeddings = []
@@ -121,7 +121,23 @@ def load_embeddings(fname="example_pairs_embeddings.txt"):
     
     return torch.vstack(positive_embeddings), torch.stack(negative_embeddings)
 
+def load_embeddings():
+    """
+    Load the embeddings from the file and return them as tensors.
+
+    Returns:
+        tuple: A tuple containing two tensors: positive and negative embeddings.
+    """
+    try:
+        pos_embeddings, neg_embeddings = pickle.load(open("embeddings.pkl", "rb"))
+    except FileNotFoundError:
+        print("Embeddings file not found. Generating new embeddings...")
+        generate_embeddings()
+        pickle.dump((pos_embeddings, neg_embeddings), open("embeddings.pkl", "wb"))
+        print("Embeddings loaded and saved to 'embeddings.pkl'.")
+    
+    return pos_embeddings, neg_embeddings
+
 if __name__ == "__main__":
     pos_embeddings, neg_embeddings = load_embeddings()
-    pickle.dump((pos_embeddings, neg_embeddings), open("embeddings.pkl", "wb"))
-    print("Embeddings loaded and saved to 'embeddings.pkl'.")
+    print(pos_embeddings.shape, neg_embeddings.shape)
